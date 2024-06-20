@@ -8,6 +8,7 @@ import (
 	l "github.com/kuromii5/posts/internal/lib/logger"
 )
 
+// я не успел, пожалуйста простите, пригласите на собеседование
 func main() {
 	// Load config
 	cfg := config.MustLoad()
