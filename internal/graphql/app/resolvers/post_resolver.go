@@ -3,31 +3,49 @@ package resolvers
 import (
 	"context"
 	"fmt"
+	"strconv"
+	"time"
 
 	"github.com/kuromii5/posts/internal/models"
 )
 
 // ID is the resolver for the id field.
 func (r *postResolver) ID(ctx context.Context, obj *models.Post) (string, error) {
-	panic(fmt.Errorf("not implemented: ID - id"))
+	return strconv.FormatUint(obj.ID, 10), nil
 }
 
 // User is the resolver for the user field.
 func (r *postResolver) User(ctx context.Context, obj *models.Post) (*models.User, error) {
-	panic(fmt.Errorf("not implemented: User - user"))
+	if obj.User == nil {
+		user, err := r.Service.UserByID(ctx, obj.UserID)
+		if err != nil {
+			return nil, fmt.Errorf("error fetching user: %v", err)
+		}
+
+		obj.User = user
+	}
+	return obj.User, nil
 }
 
 // CreatedAt is the resolver for the createdAt field.
 func (r *postResolver) CreatedAt(ctx context.Context, obj *models.Post) (string, error) {
-	panic(fmt.Errorf("not implemented: CreatedAt - createdAt"))
+	return obj.CreatedAt.Format(time.RFC3339), nil
 }
 
 // UpdatedAt is the resolver for the updatedAt field.
 func (r *postResolver) UpdatedAt(ctx context.Context, obj *models.Post) (string, error) {
-	panic(fmt.Errorf("not implemented: UpdatedAt - updatedAt"))
+	return obj.UpdatedAt.Format(time.RFC3339), nil
 }
 
 // Comments is the resolver for the comments field.
-func (r *postResolver) Comments(ctx context.Context, obj *models.Post) ([]*models.Comment, error) {
-	panic(fmt.Errorf("not implemented: Comments - comments"))
+func (r *postResolver) Comments(ctx context.Context, obj *models.Post, limit *int, offset *int) ([]*models.Comment, error) {
+	if obj.Comments == nil {
+		comments, err := r.Service.CommentsByPostID(ctx, obj.ID, limit, offset)
+		if err != nil {
+			return nil, fmt.Errorf("error fetching comments: %v", err)
+		}
+
+		obj.Comments = comments
+	}
+	return obj.Comments, nil
 }

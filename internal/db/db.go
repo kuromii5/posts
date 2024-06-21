@@ -17,18 +17,18 @@ var (
 
 type DB interface {
 	// User management
-	SaveUser(ctx context.Context, username, email string, passwordHash []byte) error
-	User(ctx context.Context, email string) (*models.User, error)
+	SaveUser(ctx context.Context, user *models.User) error
+	UserByID(ctx context.Context, id uint64) (*models.User, error)
 
 	// Post management
-	CreatePost(ctx context.Context, post *models.Post) error
-	Post(ctx context.Context, postID string) (*models.Post, error)
+	SavePost(ctx context.Context, post *models.Post) error
+	PostByID(ctx context.Context, id uint64) (*models.Post, error)
 	Posts(ctx context.Context) ([]*models.Post, error)
 
 	// Comment managemenet
-	CreateComment(ctx context.Context, comment *models.Comment) error
-	CommentsByPost(ctx context.Context, postID string) ([]*models.Comment, error)
-	CommentsByUser(ctx context.Context, userId string) ([]*models.Comment, error)
+	SaveComment(ctx context.Context, comment *models.Comment) error
+	CommentByID(ctx context.Context, commID uint64) (*models.Comment, error)
+	CommentsByPostID(ctx context.Context, postID uint64, limit, offset int) ([]*models.Comment, error)
 
 	// Close function
 	Close() error

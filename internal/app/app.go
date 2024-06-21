@@ -2,9 +2,7 @@ package app
 
 import (
 	"log/slog"
-	"time"
 
-	"github.com/go-playground/validator/v10"
 	"github.com/kuromii5/posts/internal/app/gqlserver"
 	"github.com/kuromii5/posts/internal/db"
 	"github.com/kuromii5/posts/internal/service"
@@ -19,8 +17,6 @@ func New(
 	log *slog.Logger,
 	dbUrl string,
 	dbType string,
-	secret string,
-	expires time.Duration,
 ) *App {
 	// init db
 	db, err := db.New(dbUrl, dbType)
@@ -28,8 +24,10 @@ func New(
 		panic("failed to init database")
 	}
 
-	validator := validator.New()
-	service := service.New(db, db, db, validator, log, secret, expires)
+	// init service
+	service := service.New(db, db, db, log)
+
+	// init server
 	server := gqlserver.New(log, port, service)
 
 	return &App{Server: server}

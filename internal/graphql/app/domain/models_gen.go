@@ -2,15 +2,6 @@
 
 package model
 
-type AuthPayload struct {
-	Token string `json:"token"`
-}
-
-type LoginUser struct {
-	Email    string `json:"email"`
-	Password string `json:"password"`
-}
-
 type Mutation struct {
 }
 
@@ -22,21 +13,14 @@ type NewComment struct {
 }
 
 type NewPost struct {
-	UserID  string `json:"userId"`
-	Title   string `json:"title"`
-	Content string `json:"content"`
+	UserID          string `json:"userId"`
+	Title           string `json:"title"`
+	Content         string `json:"content"`
+	CommentsEnabled bool   `json:"commentsEnabled"`
 }
 
 type NewUser struct {
 	Username string `json:"username"`
-	Email    string `json:"email"`
-	Password string `json:"password"`
-}
-
-type PostCommentState struct {
-	UserID          string `json:"userId"`
-	PostID          string `json:"postId"`
-	CommentsEnabled bool   `json:"commentsEnabled"`
 }
 
 type Query struct {

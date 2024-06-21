@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strconv"
 
 	model "github.com/kuromii5/posts/internal/graphql/app/domain"
 	"github.com/kuromii5/posts/internal/models"
@@ -12,7 +13,7 @@ import (
 
 // CreateUser is the resolver for the createUser field.
 func (r *mutationResolver) CreateUser(ctx context.Context, input model.NewUser) (*models.User, error) {
-	user, err := r.Service.CreateUser(ctx, input.Username, input.Email, input.Password)
+	user, err := r.Service.CreateUser(ctx, input.Username)
 	if err != nil {
 		if errors.Is(err, service.ErrUserExists) {
 			return nil, fmt.Errorf("user already exists")
@@ -23,32 +24,58 @@ func (r *mutationResolver) CreateUser(ctx context.Context, input model.NewUser) 
 	return user, nil
 }
 
-// LoginUser is the resolver for the loginUser field.
-func (r *mutationResolver) LoginUser(ctx context.Context, input model.LoginUser) (*model.AuthPayload, error) {
-	token, err := r.Service.LoginUser(ctx, input.Email, input.Password)
+// CreatePost is the resolver for the createPost field.
+func (r *mutationResolver) CreatePost(ctx context.Context, input model.NewPost) (*models.Post, error) {
+	userID, err := strconv.ParseUint(input.UserID, 10, 64)
 	if err != nil {
-		if errors.Is(err, service.ErrInvalidCredentials) {
-			return nil, fmt.Errorf("invalid credentials")
-		}
+		return nil, fmt.Errorf("invalid user ID")
+	}
+
+	post, err := r.Service.CreatePost(ctx, input.Title, input.Content, userID, input.CommentsEnabled)
+	if err != nil {
 		return nil, fmt.Errorf("internal server error")
 	}
 
-	// Prepare and return auth payload
-	authPayload := &model.AuthPayload{Token: token}
-	return authPayload, nil
-}
-
-// CreatePost is the resolver for the createPost field.
-func (r *mutationResolver) CreatePost(ctx context.Context, input model.NewPost) (*models.Post, error) {
-	panic(fmt.Errorf("not implemented: CreatePost - createPost"))
+	return post, nil
 }
 
 // CreateComment is the resolver for the createComment field.
 func (r *mutationResolver) CreateComment(ctx context.Context, input model.NewComment) (*models.Comment, error) {
-	panic(fmt.Errorf("not implemented: CreateComment - createComment"))
-}
+	postID, err := strconv.ParseUint(input.PostID, 10, 64)
+	if err != nil {
+		return nil, fmt.Errorf("invalid post ID")
+	}
 
-// TriggerPostCommentState is the resolver for the triggerPostCommentState field.
-func (r *mutationResolver) TriggerPostCommentState(ctx context.Context, input model.PostCommentState) (*models.Post, error) {
-	panic(fmt.Errorf("not implemented: TriggerPostCommentState - triggerPostCommentState"))
+	userID, err := strconv.ParseUint(input.UserID, 10, 64)
+	if err != nil {
+		return nil, fmt.Errorf("invalid user ID")
+	}
+
+	var parentCommentID *uint64
+	if input.ParentCommentID != nil {
+		id, err := strconv.ParseUint(*input.ParentCommentID, 10, 64)
+		if err != nil {
+			return nil, fmt.Errorf("invalid parent comment ID")
+		}
+		parentCommentID = &id
+	}
+
+	// Fetch the post to check if comments are enabled
+	post, err := r.Service.PostByID(ctx, postID)
+	if err != nil {
+		return nil, fmt.Errorf("error fetching post: %v", err)
+	}
+
+	// Check if comments are enabled for the post
+	if !post.CommentsEnabled {
+		return nil, fmt.Errorf("comments are not enabled for this post")
+	}
+
+	// Create the comment
+	comment, err := r.Service.CreateComment(ctx, postID, userID, parentCommentID, input.Content)
+	if err != nil {
+		return nil, fmt.Errorf("internal server error")
+	}
+
+	return comment, nil
 }

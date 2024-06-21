@@ -5,14 +5,12 @@ import (
 )
 
 type User struct {
-	ID           uint64     `json:"id" gorm:"primaryKey;autoIncrement"`
-	Username     string     `json:"username"`
-	Email        string     `json:"email" gorm:"uniqueIndex"`
-	PasswordHash string     `json:"-"`
-	CreatedAt    time.Time  `json:"created_at"`
-	UpdatedAt    time.Time  `json:"updated_at"`
-	Posts        []*Post    `json:"posts" gorm:"foreignKey:UserID"`
-	Comments     []*Comment `json:"comments" gorm:"foreignKey:UserID"`
+	ID        uint64     `json:"id" gorm:"primaryKey;autoIncrement"`
+	Username  string     `json:"username" gorm:"type:varchar(100);not null"`
+	CreatedAt time.Time  `json:"created_at"`
+	UpdatedAt time.Time  `json:"updated_at"`
+	Posts     []*Post    `json:"posts" gorm:"foreignKey:UserID"`
+	Comments  []*Comment `json:"comments" gorm:"foreignKey:UserID"`
 }
 
 type Post struct {

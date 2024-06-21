@@ -8,7 +8,6 @@ import (
 	l "github.com/kuromii5/posts/internal/lib/logger"
 )
 
-// я не успел, пожалуйста простите, пригласите на собеседование
 func main() {
 	// Load config
 	cfg := config.MustLoad()
@@ -18,7 +17,7 @@ func main() {
 	slog.SetDefault(log)
 
 	// init app
-	app := app.New(cfg.Port, log, cfg.DBUrl, cfg.Storage, cfg.Secret, cfg.Expires)
+	app := app.New(cfg.Port, log, cfg.DBUrl, cfg.Storage)
 
 	// run app
 	app.Server.MustRun()
