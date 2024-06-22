@@ -2,8 +2,6 @@ package postgres
 
 import (
 	"fmt"
-	"log"
-	"time"
 
 	"github.com/kuromii5/posts/internal/models"
 	"gorm.io/driver/postgres"
@@ -19,16 +17,6 @@ func New(dbUrl string) (*PostgresDB, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to connect to database: %w", err)
 	}
-
-	sqlDB, err := db.DB()
-	if err != nil {
-		return nil, fmt.Errorf("failed to get database instance: %w", err)
-	}
-
-	sqlDB.SetMaxIdleConns(10)
-	sqlDB.SetMaxOpenConns(100)
-	sqlDB.SetConnMaxLifetime(time.Hour)
-	log.Println("Database connection established")
 
 	if err := db.AutoMigrate(&models.User{}, &models.Post{}, &models.Comment{}); err != nil {
 		return nil, fmt.Errorf("failed to migrate database: %w", err)

@@ -8,6 +8,8 @@ import (
 	"github.com/kuromii5/posts/internal/models"
 )
 
+type userResolver struct{ *Resolver }
+
 // ID is the resolver for the id field.
 func (r *userResolver) ID(ctx context.Context, obj *models.User) (string, error) {
 	return strconv.FormatUint(obj.ID, 10), nil

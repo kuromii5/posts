@@ -9,6 +9,8 @@ import (
 	"github.com/kuromii5/posts/internal/models"
 )
 
+type postResolver struct{ *Resolver }
+
 // ID is the resolver for the id field.
 func (r *postResolver) ID(ctx context.Context, obj *models.Post) (string, error) {
 	return strconv.FormatUint(obj.ID, 10), nil

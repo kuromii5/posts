@@ -24,13 +24,15 @@ type Comment {
   content: String!
   createdAt: String!
   updatedAt: String!
+  replies(limit: Int, offset: Int): [Comment!]
 }
 
 type Query {
   user(id: ID!): User!
-  posts(limit: Int, offset: Int): [Post!]!
+  posts: [Post!]!
   post(id: ID!): Post!
   comments(postId: ID!, limit: Int, offset: Int): [Comment!]!
+  replies(commentId: ID!, limit: Int, offset: Int): [Comment!]!
 }
 
 input NewUser {

@@ -11,7 +11,8 @@ import (
 	"github.com/kuromii5/posts/internal/service"
 )
 
-// CreateUser is the resolver for the createUser field.
+type mutationResolver struct{ *Resolver }
+
 func (r *mutationResolver) CreateUser(ctx context.Context, input model.NewUser) (*models.User, error) {
 	user, err := r.Service.CreateUser(ctx, input.Username)
 	if err != nil {
@@ -24,7 +25,6 @@ func (r *mutationResolver) CreateUser(ctx context.Context, input model.NewUser) 
 	return user, nil
 }
 
-// CreatePost is the resolver for the createPost field.
 func (r *mutationResolver) CreatePost(ctx context.Context, input model.NewPost) (*models.Post, error) {
 	userID, err := strconv.ParseUint(input.UserID, 10, 64)
 	if err != nil {
@@ -39,7 +39,6 @@ func (r *mutationResolver) CreatePost(ctx context.Context, input model.NewPost) 
 	return post, nil
 }
 
-// CreateComment is the resolver for the createComment field.
 func (r *mutationResolver) CreateComment(ctx context.Context, input model.NewComment) (*models.Comment, error) {
 	postID, err := strconv.ParseUint(input.PostID, 10, 64)
 	if err != nil {
@@ -51,6 +50,8 @@ func (r *mutationResolver) CreateComment(ctx context.Context, input model.NewCom
 		return nil, fmt.Errorf("invalid user ID")
 	}
 
+	// Check if there is parent comment
+	// if so - bind id pointer to comment
 	var parentCommentID *uint64
 	if input.ParentCommentID != nil {
 		id, err := strconv.ParseUint(*input.ParentCommentID, 10, 64)
@@ -72,9 +73,13 @@ func (r *mutationResolver) CreateComment(ctx context.Context, input model.NewCom
 	}
 
 	// Create the comment
-	comment, err := r.Service.CreateComment(ctx, postID, userID, parentCommentID, input.Content)
+	comment, err := r.Service.CreateComment(ctx, userID, postID, parentCommentID, input.Content)
 	if err != nil {
 		return nil, fmt.Errorf("internal server error")
+	}
+
+	if parentCommentID == nil {
+		r.Service.PubSubService.Publish(postID, comment)
 	}
 
 	return comment, nil

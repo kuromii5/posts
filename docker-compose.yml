@@ -1,12 +1,17 @@
+version: "3.8"
+
 services:
   postgres:
+    restart: always
     image: "postgres:latest"
     environment:
-      - POSTGRES_DB=${POSTGRES_DB}
-      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_DB=reddit_clone
+      - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    ports:
+      - 5432:5432
 
   redis:
     image: "redis:latest"
@@ -16,7 +21,7 @@ services:
       context: .
       dockerfile: Dockerfile
     ports:
-      - "${PORT}:8000"
+      - "${PORT}:${PORT}"
     env_file:
       - .env
     volumes:
@@ -24,7 +29,12 @@ services:
     depends_on:
       - postgres
       - redis
-    command: ["bash", "-c", "go build -v -o main ./cmd/app && ./main"]
+    command:
+      [
+        "bash",
+        "-c",
+        "go build -v -o main ./cmd/app && ./main --storage ${STORAGE}",
+      ]
 
 volumes:
   postgres_data:

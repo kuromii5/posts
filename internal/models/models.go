@@ -26,14 +26,15 @@ type Post struct {
 }
 
 type Comment struct {
-	ID              uint64    `json:"id" gorm:"primaryKey;autoIncrement"`
-	PostID          uint64    `json:"post_id" gorm:"index"`
-	ParentCommentID *uint64   `json:"parent_comment_id,omitempty"`
-	UserID          uint64    `json:"user_id" gorm:"index"`
-	Content         string    `json:"content"`
-	CreatedAt       time.Time `json:"created_at"`
-	UpdatedAt       time.Time `json:"updated_at"`
-	User            *User     `json:"user" gorm:"foreignKey:UserID"`
-	Post            *Post     `json:"post" gorm:"foreignKey:PostID"`
-	ParentComment   *Comment  `json:"parent_comment,omitempty" gorm:"foreignKey:ParentCommentID"`
+	ID              uint64     `json:"id" gorm:"primaryKey;autoIncrement"`
+	PostID          uint64     `json:"post_id" gorm:"index"`
+	ParentCommentID *uint64    `json:"parent_comment_id,omitempty"`
+	UserID          uint64     `json:"user_id" gorm:"index"`
+	Content         string     `json:"content"`
+	CreatedAt       time.Time  `json:"created_at"`
+	UpdatedAt       time.Time  `json:"updated_at"`
+	User            *User      `json:"user" gorm:"foreignKey:UserID"`
+	Post            *Post      `json:"post" gorm:"foreignKey:PostID"`
+	ParentComment   *Comment   `json:"parent_comment,omitempty" gorm:"foreignKey:ParentCommentID"`
+	Replies         []*Comment `json:"replies,omitempty" gorm:"foreignKey:ParentCommentID"`
 }

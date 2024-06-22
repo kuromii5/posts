@@ -9,6 +9,8 @@ import (
 	"github.com/kuromii5/posts/internal/models"
 )
 
+type commentResolver struct{ *Resolver }
+
 // ID is the resolver for the id field.
 func (r *commentResolver) ID(ctx context.Context, obj *models.Comment) (string, error) {
 	return strconv.FormatUint(obj.ID, 10), nil
@@ -53,6 +55,15 @@ func (r *commentResolver) User(ctx context.Context, obj *models.Comment) (*model
 	}
 
 	return obj.User, nil
+}
+
+// Replies is the resolver for the replies field.
+func (r *commentResolver) Replies(ctx context.Context, obj *models.Comment, limit, offset *int) ([]*models.Comment, error) {
+	replies, err := r.Service.RepliesByCommentID(ctx, obj.ID, limit, offset)
+	if err != nil {
+		return nil, fmt.Errorf("error fetching replies: %v", err)
+	}
+	return replies, nil
 }
 
 func (r *commentResolver) CreatedAt(ctx context.Context, obj *models.Comment) (string, error) {

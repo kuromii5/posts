@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log/slog"
 	"time"
@@ -15,6 +16,7 @@ type CommentManager interface {
 	SaveComment(ctx context.Context, comment *models.Comment) error
 	CommentByID(ctx context.Context, commID uint64) (*models.Comment, error)
 	CommentsByPostID(ctx context.Context, postID uint64, limit, offset int) ([]*models.Comment, error)
+	RepliesByCommentID(ctx context.Context, commID uint64, limit, offset int) ([]*models.Comment, error)
 }
 
 type CommentReg struct {
@@ -23,7 +25,7 @@ type CommentReg struct {
 
 func (s *Service) CreateComment(
 	ctx context.Context,
-	postID, userID uint64,
+	userID, postID uint64,
 	parentCommentID *uint64,
 	content string,
 ) (*models.Comment, error) {
@@ -36,6 +38,23 @@ func (s *Service) CreateComment(
 	if err := s.validateCommentReg(content); err != nil {
 		log.Error("invalid comment content", l.Err(err))
 		return nil, fmt.Errorf("input validation error: %w", err)
+	}
+
+	// Check if parentCommentID is provided
+	if parentCommentID != nil {
+		// Retrieve parent comment to verify postID
+		parentComment, err := s.commentService.CommentByID(ctx, *parentCommentID)
+		if err != nil {
+			log.Error("failed to retrieve parent comment", l.Err(err))
+			return nil, fmt.Errorf("failed to retrieve parent comment: %w", err)
+		}
+
+		// Check if postID of parent comment matches postID provided
+		if parentComment.PostID != postID {
+			errMsg := fmt.Sprintf("postID of parent comment (%d) does not match postID provided (%d)", parentComment.PostID, postID)
+			log.Error(errMsg)
+			return nil, errors.New(errMsg)
+		}
 	}
 
 	comment := &models.Comment{
@@ -53,7 +72,7 @@ func (s *Service) CreateComment(
 		return nil, fmt.Errorf("failed to save comment: %w", err)
 	}
 
-	log.Info("comment created successfully", slog.Uint64("postID", postID), slog.Uint64("userID", userID))
+	log.Info("comment created successfully", slog.Uint64("userID", userID))
 
 	return comment, nil
 }
@@ -85,4 +104,20 @@ func (s *Service) CommentsByPostID(ctx context.Context, postID uint64, limit, of
 	}
 
 	return s.commentService.CommentsByPostID(ctx, postID, *limit, *offset)
+}
+
+func (s *Service) RepliesByCommentID(ctx context.Context, commID uint64, limit, offset *int) ([]*models.Comment, error) {
+	// Use default limit if not provided
+	if limit == nil {
+		defaultLimit := 10
+		limit = &defaultLimit
+	}
+
+	// Use default offset if not provided
+	if offset == nil {
+		defaultOffset := 0
+		offset = &defaultOffset
+	}
+
+	return s.commentService.RepliesByCommentID(ctx, commID, *limit, *offset)
 }

@@ -10,6 +10,7 @@ import (
 	"syscall"
 
 	"github.com/99designs/gqlgen/graphql/handler"
+	"github.com/99designs/gqlgen/graphql/handler/transport"
 	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/kuromii5/posts/internal/graphql/app/resolvers"
 	"github.com/kuromii5/posts/internal/graphql/graph"
@@ -30,6 +31,7 @@ func New(
 ) *GQLServer {
 	resolver := &resolvers.Resolver{Service: *service}
 	srv := handler.NewDefaultServer(graph.NewExecutableSchema(graph.Config{Resolvers: resolver}))
+	srv.AddTransport(&transport.Websocket{}) // add websocket for subscriptions
 
 	return &GQLServer{
 		log:  log,
@@ -43,6 +45,7 @@ func (a *GQLServer) run() error {
 	mux := http.NewServeMux()
 	mux.Handle("/graphql", a.srv)
 	mux.Handle("/playground", playground.Handler("GraphQL Playground", "/graphql"))
+	mux.Handle("/subscriptions", a.srv)
 
 	addr := fmt.Sprintf(":%d", a.port)
 	a.httpsrv = &http.Server{

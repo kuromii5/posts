@@ -4,6 +4,7 @@ import (
 	"log/slog"
 
 	"github.com/kuromii5/posts/internal/app/gqlserver"
+	"github.com/kuromii5/posts/internal/config"
 	"github.com/kuromii5/posts/internal/db"
 	"github.com/kuromii5/posts/internal/service"
 )
@@ -12,14 +13,9 @@ type App struct {
 	Server *gqlserver.GQLServer
 }
 
-func New(
-	port int,
-	log *slog.Logger,
-	dbUrl string,
-	dbType string,
-) *App {
+func New(log *slog.Logger, config *config.Config) *App {
 	// init db
-	db, err := db.New(dbUrl, dbType)
+	db, err := db.New(config)
 	if err != nil {
 		panic("failed to init database")
 	}
@@ -28,7 +24,7 @@ func New(
 	service := service.New(db, db, db, log)
 
 	// init server
-	server := gqlserver.New(log, port, service)
+	server := gqlserver.New(log, config.Port, service)
 
 	return &App{Server: server}
 }

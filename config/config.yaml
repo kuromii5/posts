@@ -1,0 +1,9 @@
+storage: ${STORAGE}
+env: ${ENV}
+port: ${PORT}
+
+postgres:
+  url: "postgres://postgres:${POSTGRES_PASSWORD}@postgres:5432/reddit_clone?sslmode=disable"
+
+redis:
+  url: ${REDIS_URL}

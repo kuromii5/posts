@@ -49,3 +49,5 @@ models:
         resolver: true
       parentComment:
         resolver: true
+      replies:
+        resolver: true

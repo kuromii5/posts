@@ -8,7 +8,8 @@ import (
 	"github.com/kuromii5/posts/internal/models"
 )
 
-// User is the resolver for the user field.
+type queryResolver struct{ *Resolver }
+
 func (r *queryResolver) User(ctx context.Context, id string) (*models.User, error) {
 	userID, err := strconv.ParseUint(id, 10, 64)
 	if err != nil {
@@ -23,8 +24,7 @@ func (r *queryResolver) User(ctx context.Context, id string) (*models.User, erro
 	return user, nil
 }
 
-// Posts is the resolver for the posts field.
-func (r *queryResolver) Posts(ctx context.Context, limit *int, offset *int) ([]*models.Post, error) {
+func (r *queryResolver) Posts(ctx context.Context) ([]*models.Post, error) {
 	var posts []*models.Post
 	var err error
 
@@ -36,7 +36,6 @@ func (r *queryResolver) Posts(ctx context.Context, limit *int, offset *int) ([]*
 	return posts, nil
 }
 
-// Post is the resolver for the post field.
 func (r *queryResolver) Post(ctx context.Context, id string) (*models.Post, error) {
 	postID, err := strconv.ParseUint(id, 10, 64)
 	if err != nil {
@@ -51,7 +50,6 @@ func (r *queryResolver) Post(ctx context.Context, id string) (*models.Post, erro
 	return post, nil
 }
 
-// Posts is the resolver for the posts field.
 func (r *queryResolver) Comments(ctx context.Context, postID string, limit *int, offset *int) ([]*models.Comment, error) {
 	postId, err := strconv.ParseUint(postID, 10, 64)
 	if err != nil {
@@ -60,6 +58,22 @@ func (r *queryResolver) Comments(ctx context.Context, postID string, limit *int,
 
 	var comments []*models.Comment
 	comments, err = r.Service.CommentsByPostID(ctx, postId, limit, offset)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get comments: %v", err)
+	}
+
+	return comments, nil
+}
+
+// Replies is the resolver for the replies field.
+func (r *queryResolver) Replies(ctx context.Context, commentID string, limit *int, offset *int) ([]*models.Comment, error) {
+	commentId, err := strconv.ParseUint(commentID, 10, 64)
+	if err != nil {
+		return nil, fmt.Errorf("invalid post ID: %v", err)
+	}
+
+	var comments []*models.Comment
+	comments, err = r.Service.RepliesByCommentID(ctx, commentId, limit, offset)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get comments: %v", err)
 	}

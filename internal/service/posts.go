@@ -19,7 +19,7 @@ func (s *Service) CreatePost(ctx context.Context, title, content string, userID 
 	const f = "service.CreatePost"
 
 	log := s.log.With(slog.String("func", f))
-	log.Info("Creating new comment")
+	log.Info("Creating new post")
 
 	post := &models.Post{
 		Title:           title,
