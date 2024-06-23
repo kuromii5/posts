@@ -3,8 +3,8 @@ package postgres_test
 import (
 	"testing"
 
-	"github.com/DATA-DOG/go-sqlmock"
 	pg "github.com/kuromii5/posts/internal/db/postgres"
+	"github.com/kuromii5/posts/internal/models"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 	"gorm.io/driver/postgres"
@@ -13,37 +13,32 @@ import (
 
 type PostgresDBTestSuite struct {
 	suite.Suite
-	mock sqlmock.Sqlmock
-	db   *gorm.DB
-	pgDB *pg.PostgresDB
+	db *pg.PostgresDB
 }
+
+var dbUrl = "postgres://postgres:admin@localhost:5432/reddit_clone_test?sslmode=disable"
 
 func (suite *PostgresDBTestSuite) SetupSuite() {
 	var err error
 
-	// Create a mock database connection
-	db, mock, err := sqlmock.New()
+	db, err := gorm.Open(postgres.Open(dbUrl), &gorm.Config{})
 	assert.NoError(suite.T(), err)
+	suite.db = &pg.PostgresDB{DB: db}
 
-	// Initialize Gorm with the mock database connection
-	suite.db, err = gorm.Open(postgres.New(postgres.Config{
-		Conn: db,
-	}), &gorm.Config{})
+	// Auto migrate the database schema for testing
+	err = suite.db.DB.AutoMigrate(&models.User{}, &models.Post{}, &models.Comment{})
 	assert.NoError(suite.T(), err)
-
-	suite.mock = mock
-
-	suite.pgDB = &pg.PostgresDB{DB: suite.db}
 }
 
 func (suite *PostgresDBTestSuite) TearDownSuite() {
-	sqlDB, err := suite.db.DB()
+	sqlDB, err := suite.db.DB.DB()
 	assert.NoError(suite.T(), err)
 	sqlDB.Close()
 }
 
 func (suite *PostgresDBTestSuite) TearDownTest() {
-	suite.db.Rollback()
+	// Clean up the database after each test
+	suite.db.DB.Exec("TRUNCATE TABLE users RESTART IDENTITY CASCADE")
 }
 
 func TestPostgresDBTestSuite(t *testing.T) {

@@ -42,7 +42,6 @@ require (
 )
 
 require (
-	github.com/DATA-DOG/go-sqlmock v1.5.2
 	github.com/agnivade/levenshtein v1.1.1 // indirect
 	github.com/alicebob/miniredis/v2 v2.33.0
 	github.com/cespare/xxhash/v2 v2.2.0 // indirect
