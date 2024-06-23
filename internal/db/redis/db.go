@@ -8,7 +8,7 @@ import (
 )
 
 type RedisDB struct {
-	client *redis.Client
+	Client *redis.Client
 }
 
 func New(redisUrl string) (*RedisDB, error) {
@@ -18,16 +18,17 @@ func New(redisUrl string) (*RedisDB, error) {
 		DB:       0,
 	})
 
+	// check connection
 	err := rdb.Ping(context.Background()).Err()
 	if err != nil {
 		return nil, err
 	}
 
-	return &RedisDB{client: rdb}, nil
+	return &RedisDB{Client: rdb}, nil
 }
 
 func (r *RedisDB) Close() error {
-	if err := r.client.Close(); err != nil {
+	if err := r.Client.Close(); err != nil {
 		return fmt.Errorf("close db error: %s", err)
 	}
 	return nil

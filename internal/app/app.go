@@ -4,8 +4,8 @@ import (
 	"log/slog"
 
 	"github.com/kuromii5/posts/internal/app/gqlserver"
+	"github.com/kuromii5/posts/internal/app/storage"
 	"github.com/kuromii5/posts/internal/config"
-	"github.com/kuromii5/posts/internal/db"
 	"github.com/kuromii5/posts/internal/service"
 )
 
@@ -15,7 +15,7 @@ type App struct {
 
 func New(log *slog.Logger, config *config.Config) *App {
 	// init db
-	db, err := db.New(config)
+	db, err := storage.New(config)
 	if err != nil {
 		panic("failed to init database")
 	}

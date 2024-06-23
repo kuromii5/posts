@@ -17,6 +17,7 @@ func main() {
 	slog.SetDefault(log)
 
 	log.Debug("config", slog.Any("port", cfg.Port), slog.Any("postgres url", cfg.Postgres.URL), slog.Any("redis url", cfg.Redis.URL), slog.Any("storage type", cfg.Storage))
+
 	// init app
 	app := app.New(log, cfg)
 

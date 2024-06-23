@@ -3,58 +3,40 @@ package db
 import (
 	"context"
 	"errors"
-	"fmt"
-	"log"
 
-	"github.com/kuromii5/posts/internal/config"
-	"github.com/kuromii5/posts/internal/db/postgres"
-	"github.com/kuromii5/posts/internal/db/redis"
 	"github.com/kuromii5/posts/internal/models"
 )
 
-var (
-	ErrUserExists   = errors.New("user already exists")
-	ErrUserNotFound = errors.New("user not found")
-)
+var ErrNotFound = errors.New("not found")
 
 type DB interface {
-	// User management
+	// Save user in database
 	SaveUser(ctx context.Context, user *models.User) error
+
+	// Get user from database by ID
 	UserByID(ctx context.Context, id uint64) (*models.User, error)
 
-	// Post management
+	// Save post in database
 	SavePost(ctx context.Context, post *models.Post) error
+
+	// Get post from database by ID
 	PostByID(ctx context.Context, id uint64) (*models.Post, error)
+
+	// Get all created posts
 	Posts(ctx context.Context) ([]*models.Post, error)
 
-	// Comment managemenet
+	// Save comment in database
 	SaveComment(ctx context.Context, comment *models.Comment) error
+
+	// Get comment by ID
 	CommentByID(ctx context.Context, commID uint64) (*models.Comment, error)
+
+	// Get all comments on post with given ID (pagination included)
 	CommentsByPostID(ctx context.Context, postID uint64, limit, offset int) ([]*models.Comment, error)
+
+	// Get all replies on the comment with given ID (pagination included)
 	RepliesByCommentID(ctx context.Context, commID uint64, limit, offset int) ([]*models.Comment, error)
 
-	// Close function
+	// Close db connection function
 	Close() error
-}
-
-func New(config *config.Config) (DB, error) {
-	const f = "db/db.New"
-	var db DB
-	var err error
-
-	switch config.Storage {
-	case "postgres":
-		db, err = postgres.New(config.Postgres.URL)
-	case "redis":
-		db, err = redis.New(config.Redis.URL)
-	default:
-		return nil, fmt.Errorf("unsupported storage type: %s", config.Storage)
-	}
-	if err != nil {
-		return nil, fmt.Errorf("%s:%w", f, err)
-	}
-
-	log.Println("Database connection established, storage:", config.Storage)
-
-	return db, nil
 }

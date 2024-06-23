@@ -11,12 +11,10 @@ import (
 
 type commentResolver struct{ *Resolver }
 
-// ID is the resolver for the id field.
 func (r *commentResolver) ID(ctx context.Context, obj *models.Comment) (string, error) {
 	return strconv.FormatUint(obj.ID, 10), nil
 }
 
-// Post is the resolver for the post field.
 func (r *commentResolver) Post(ctx context.Context, obj *models.Comment) (*models.Post, error) {
 	if obj.Post == nil {
 		post, err := r.Service.PostByID(ctx, obj.PostID)
@@ -29,7 +27,6 @@ func (r *commentResolver) Post(ctx context.Context, obj *models.Comment) (*model
 	return obj.Post, nil
 }
 
-// ParentComment is the resolver for the parentComment field.
 func (r *commentResolver) ParentComment(ctx context.Context, obj *models.Comment) (*models.Comment, error) {
 	if obj.ParentCommentID == nil {
 		return nil, nil
@@ -57,7 +54,6 @@ func (r *commentResolver) User(ctx context.Context, obj *models.Comment) (*model
 	return obj.User, nil
 }
 
-// Replies is the resolver for the replies field.
 func (r *commentResolver) Replies(ctx context.Context, obj *models.Comment, limit, offset *int) ([]*models.Comment, error) {
 	replies, err := r.Service.RepliesByCommentID(ctx, obj.ID, limit, offset)
 	if err != nil {

@@ -62,7 +62,7 @@ func (a *GQLServer) run() error {
 
 	a.log.Info("GraphQL server started", slog.Int("port", a.port), slog.String("func", f))
 
-	// Wait for interrupt signal to gracefully shutdown the server with a timeout of 5 seconds.
+	// Wait for interrupt signal to gracefully shutdown the server with a timeout.
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 	<-quit

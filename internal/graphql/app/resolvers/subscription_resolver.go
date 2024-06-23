@@ -10,7 +10,6 @@ import (
 
 type subscriptionResolver struct{ *Resolver }
 
-// CommentAdded is the resolver for the commentAdded field.
 func (r *subscriptionResolver) CommentAdded(ctx context.Context, postID string) (<-chan *models.Comment, error) {
 	postId, err := strconv.ParseUint(postID, 10, 64)
 	if err != nil {

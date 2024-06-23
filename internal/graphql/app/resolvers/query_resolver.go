@@ -10,6 +10,7 @@ import (
 
 type queryResolver struct{ *Resolver }
 
+// Get user from database by ID
 func (r *queryResolver) User(ctx context.Context, id string) (*models.User, error) {
 	userID, err := strconv.ParseUint(id, 10, 64)
 	if err != nil {
@@ -24,6 +25,7 @@ func (r *queryResolver) User(ctx context.Context, id string) (*models.User, erro
 	return user, nil
 }
 
+// Get all created posts
 func (r *queryResolver) Posts(ctx context.Context) ([]*models.Post, error) {
 	var posts []*models.Post
 	var err error
@@ -36,6 +38,7 @@ func (r *queryResolver) Posts(ctx context.Context) ([]*models.Post, error) {
 	return posts, nil
 }
 
+// Get post from database by ID
 func (r *queryResolver) Post(ctx context.Context, id string) (*models.Post, error) {
 	postID, err := strconv.ParseUint(id, 10, 64)
 	if err != nil {
@@ -50,6 +53,7 @@ func (r *queryResolver) Post(ctx context.Context, id string) (*models.Post, erro
 	return post, nil
 }
 
+// Get all comments on post with given ID (pagination included)
 func (r *queryResolver) Comments(ctx context.Context, postID string, limit *int, offset *int) ([]*models.Comment, error) {
 	postId, err := strconv.ParseUint(postID, 10, 64)
 	if err != nil {
@@ -65,7 +69,7 @@ func (r *queryResolver) Comments(ctx context.Context, postID string, limit *int,
 	return comments, nil
 }
 
-// Replies is the resolver for the replies field.
+// Get all replies on the comment with given ID (pagination included)
 func (r *queryResolver) Replies(ctx context.Context, commentID string, limit *int, offset *int) ([]*models.Comment, error) {
 	commentId, err := strconv.ParseUint(commentID, 10, 64)
 	if err != nil {

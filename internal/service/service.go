@@ -5,15 +5,12 @@ import (
 	"log/slog"
 )
 
-var (
-	ErrInvalidCredentials = errors.New("invalid credentials")
-	ErrUserExists         = errors.New("user already exists")
-)
+var ErrNotFound = errors.New("not found")
 
 type Service struct {
-	userService    UserManager
-	postService    PostManager
-	commentService CommentManager
+	UserService    UserManager
+	PostService    PostManager
+	CommentService CommentManager
 	PubSubService  *SubscriptionManager
 	log            *slog.Logger
 }
@@ -24,11 +21,11 @@ func New(
 	commentService CommentManager,
 	log *slog.Logger,
 ) *Service {
-	pubSubService := NewSubscriptionManager()
+	pubSubService := NewSubscriptionManager(log)
 	return &Service{
-		userService:    userService,
-		postService:    postService,
-		commentService: commentService,
+		UserService:    userService,
+		PostService:    postService,
+		CommentService: commentService,
 		PubSubService:  pubSubService,
 		log:            log,
 	}
